@@ -16,9 +16,10 @@
 #include <stdio.h>				//for vsprintf()
 
 #define WRITEONLY 1
+#define ENDADDRESS 0x27
 
-#define RIGHT 0			//direction of shift to use with MyLCD::shift()
-#define LEFT 1
+#define RIGHT 1			//direction of shift to use with MyLCD::shift()
+#define LEFT 0
 
 #define LtoR 1
 #define RtoL 0
@@ -67,11 +68,12 @@ public:
 	//void init(uint8_t Lines);
 	
 	void setCursor(bool Line,uint8_t address);
-	void shiftR(uint8_t num, short delay=100);
-	void shiftL(uint8_t num, short delay=100);
+	void shiftR(uint8_t num, short delay=100);						//shift the visible part of the display(not the cursor) to the right
+	void shiftL(uint8_t num, short delay=100);						//shift the visible part of the display(not the cursor) to the left
 	void shift(uint8_t direction, uint8_t num, short delay=100);
 	
-	void writeDirecion(char address=0x10, bool line=0, bool direction=LtoR);
+	void displayShift(char fixedStartAddress=0x10, bool line=0, bool direction=LtoR);
+	void writeDirection(char startAddress=0x00, bool Line=0, bool direction=LtoR);
 	
 private:
 	struct storage{

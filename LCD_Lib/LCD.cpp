@@ -369,12 +369,28 @@ void MyLCD::shiftR(uint8_t num, short delay){
 	shift(RIGHT,num,delay);
 }
 
-void MyLCD::writeDirecion(char address, bool line, bool direction){
-	setCursor(line,address);
+void MyLCD::displayShift(char fixedStartAddress, bool line, bool direction){
+	setCursor(line,fixedStartAddress);
+	command();
 	if(direction){
 		writeChar(0b00000111);
 	}
 	else{
 		writeChar(0b00000110);
+	}
+}
+
+void MyLCD::writeDirection(char startAddress/* =0x00 */, bool Line/* =0 */, bool direction/* =LtoR */){
+	setCursor(Line,startAddress);
+	command();
+	if(direction){
+		writeChar(0b0110);
+	}
+	else{
+		writeChar(0b0100);
+		/* This sites the visible part of the display to be the left part(from 0x18 to 0x27)
+		if(startAddress == ENDADDRESS)
+			shiftR(0x18,0);
+		*/
 	}
 }

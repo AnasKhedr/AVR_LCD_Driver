@@ -27,11 +27,16 @@ int main(void){
 	//char temp='0';
 	//bool line=0;
 	//char x=0;
-	lcd.writeDirecion(0,0,0);
-	lcd.print("anas ahmed fouad hassan khedr");
+	//lcd.writeDirecion(0,0,0);
+	//lcd.print("anas ahmed fouad hassan khedr");
 	lcd.command();
+	lcd.writeDirection(ENDADDRESS,0,RtoL);
+	lcd.print("anas");
+	lcd.shiftR(0x18,100);
     while (1) 
     {
+		//lcd.shiftL(1,1000);
+		
 		/*
 		lcd.print(temp);
 		
@@ -43,14 +48,14 @@ int main(void){
 		temp++;
 		_delay_ms(1000);
 		*/
-		
+		/*
 		lcd.shift(LEFT,5,100);
 		//lcd.home();
 		_delay_ms(3000);
 		lcd.shift(RIGHT,5,200);
 		//lcd.home();
 		_delay_ms(3000);
-		
+		*/
 		/*
 		lcd.setCursor(line,temp);
 		temp++;
