@@ -4,7 +4,7 @@
  * Created: 02-Apr-19 11:38:15 PM
  * Author : anas
  */ 
-#define F_CPU 1000000UL
+#define F_CPU 8000000UL
 
 #include <avr/io.h>
 #include "LCD.h"
@@ -26,16 +26,86 @@ int main(void){
 	//DDRC = 0x01;
 	//char temp='0';
 	//bool line=0;
-	//char x=0;
+	int x=0;
 	//lcd.writeDirecion(0,0,0);
 	//lcd.print("anas ahmed fouad hassan khedr");
 	lcd.command();
-	lcd.writeDirection(ENDADDRESS,0,RtoL);
-	lcd.print("anas");
-	lcd.shiftR(0x18,100);
+	//lcd.writeDirection(ENDADDRESS,0,RtoL);
+	//lcd.print("anas: %d",x);
+	//lcd.shiftR(0x18,100);
+	
+	struct tempx 
+	{
+		float x;
+		char y;
+	};
+	
+	lcd.command();
+	lcd.clear();
+	lcd.setCursor(0,0);
+	/*
+	//_delay_ms(20);
+	lcd.command();
+	lcd.writeChar(0x40 | 0);
+	
+	lcd.data();
+	lcd.writeChar(0b01100);
+	lcd.writeChar(0b01100);
+	lcd.writeChar(0b01100);
+	lcd.writeChar(0b01100);
+	lcd.writeChar(0b01100);
+	lcd.writeChar(0b01100);
+	lcd.writeChar(0b01100);
+	lcd.writeChar(0b01100);
+	
+	lcd.command();
+	lcd.setCursor(0,0);
+	lcd.data();
+	lcd.writeChar((uint8_t)0);
+	*/
+	char customChar[7] = {14,27,24,30,27,27,14	};
+	
+	uint8_t d_ch=lcd.defineGraph(customChar);
+	char customChar2[] = {10,10,31,31,14,4,4};
+	uint8_t d_ch2=lcd.defineGraph(customChar2);
+	lcd.command();
+	lcd.setCursor(0,0);
+	lcd.data();
+	lcd.print("%d",(int)d_ch);
+	lcd.writeChar(d_ch);
+	lcd.writeChar(d_ch2);
+	
     while (1) 
     {
-		//lcd.shiftL(1,1000);
+		
+		
+		/*
+		lcd.print("size of struct:%d",sizeof(tempx));
+		_delay_ms(3000);
+		lcd.clear();
+		
+		lcd.print("size of char:%d",sizeof(char));
+		_delay_ms(3000);
+		lcd.clear();
+		
+		lcd.print("size of int:%d",sizeof(int));
+		_delay_ms(3000);
+		lcd.clear();
+		
+		lcd.print("size of short:%d",sizeof(short));
+		_delay_ms(3000);
+		lcd.clear();
+		
+		lcd.print("size of float:%d",sizeof(float));
+		_delay_ms(3000);
+		lcd.clear();
+		*/
+		/*
+		_delay_ms(1000);
+		x++;
+		lcd.setCursor(0,0);
+		lcd.print("anas: %d",x);
+		*/
 		
 		/*
 		lcd.print(temp);

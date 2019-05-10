@@ -4,7 +4,7 @@
  * Created: 29-Mar-19 11:54:22 PM
  *  Author: Anas Khedr
  */ 
-#define F_CPU 1000000UL
+#define F_CPU 8000000UL
 
 #ifndef LCD_H_
 #define LCD_H_
@@ -43,13 +43,13 @@ public:
 	MyLCD(char Port_of_D,uint8_t D7,uint8_t D6,uint8_t D5,uint8_t D4,uint8_t RS,uint8_t RW,uint8_t E);
 	MyLCD(char Port_of_D,uint8_t D7,uint8_t D6,uint8_t D5,uint8_t D4,uint8_t RS,uint8_t E);
 	
-	void command();
-	void data();
+	void command();							//call this function before using writeChar() to send a command
+	void data();							//call this function before using writeChar() to send a data(a character)
 	
-	void clear();
-	void home();
+	void clear();							//clear the LCD (basically reset it)
+	void home();							//return the cursor and the display to initial position without reseting everything (command: display and cursor home)
 	
-	bool read();
+	//bool read();
 	void writeChar(char buffer);			//Helper Function, you need to specify what you are sending it (Data or Command)
 	
 	void upperWrite();						//Helper to Helper
@@ -59,7 +59,6 @@ public:
 	void printString(char* str);			//Main(accepts string array only) and Helper
 	void print(const char* format, ...);	//Main(works like printf for the display)
 	void print(char* str);
-	//const auto print(char* str) = static_cast<void(*)(char* str)>(printString);
 	void print(char ch);
 	
 	void send();
@@ -75,6 +74,8 @@ public:
 	void displayShift(char fixedStartAddress=0x10, bool line=0, bool direction=LtoR);
 	void writeDirection(char startAddress=0x00, bool Line=0, bool direction=LtoR);
 	
+	uint8_t defineGraph(char graph[8], uint8_t address=0);			
+	//use this site to generate your custom character :https://www.quinapalus.com/hd44780udg.html
 private:
 	struct storage{
 		uint8_t RS:3,RW:3,E:3,D0:3,D1:3,D2:3,D3:3,D4:3,D5:3,D6:3,D7:3,Port_of_D:4,Port_of_registers:4,wire_num:1,RW_Status:1;

@@ -4,7 +4,7 @@
  * Created: 29-Mar-19 11:52:55 PM
  * Author : Anas Khedr
  */
-#define F_CPU 1000000UL
+#define F_CPU 8000000UL
 
 #include "LCD.h"
 #include <avr/io.h>
@@ -393,4 +393,27 @@ void MyLCD::writeDirection(char startAddress/* =0x00 */, bool Line/* =0 */, bool
 			shiftR(0x18,0);
 		*/
 	}
+}
+
+
+uint8_t MyLCD::defineGraph(char graph[8], uint8_t address/* =0 */){
+	static uint8_t idx=0x40;		//this is the first address we can save a new char in
+	if(address){
+		idx = 0x40 + address*8;
+	}
+	
+	if(idx >= 0x80){				//you have defined 8 new characters which is the max number on new characters that can be defined
+		//return -1;				//return error (0xff)
+	}
+	
+	command();
+	writeChar(idx);
+	
+	data();
+	for(uint8_t i=0; i<8;i++){
+		writeChar(graph[i]);
+	}
+	
+	idx+=8;
+	return (idx-0x40)/8 -1;				//return the address which you can use to print the char you defined
 }
