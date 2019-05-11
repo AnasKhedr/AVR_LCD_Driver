@@ -4,7 +4,7 @@
  * Created: 29-Mar-19 11:54:22 PM
  *  Author: Anas Khedr
  */ 
-#define F_CPU 8000000UL
+//#define F_CPU 8000000UL
 
 #ifndef LCD_H_
 #define LCD_H_
@@ -42,6 +42,7 @@ public:
 	MyLCD(char Port_of_D,uint8_t D7,uint8_t D6,uint8_t D5,uint8_t D4,uint8_t D3,uint8_t D2,uint8_t D1,uint8_t D0,char Port_of_registers,uint8_t RS,uint8_t E);
 	MyLCD(char Port_of_D,uint8_t D7,uint8_t D6,uint8_t D5,uint8_t D4,uint8_t RS,uint8_t RW,uint8_t E);
 	MyLCD(char Port_of_D,uint8_t D7,uint8_t D6,uint8_t D5,uint8_t D4,uint8_t RS,uint8_t E);
+	//overloaded constructor when creating an object, Port_of_D is the port that D0-D7 will be connected to e.g PORTA = 'A'. D7-D0 are the MCU pins (of Port_of_D) that will be connected to LCD D7-D0 respectively
 	
 	void command();							//call this function before using writeChar() to send a command
 	void data();							//call this function before using writeChar() to send a data(a character)
@@ -49,32 +50,32 @@ public:
 	void clear();							//clear the LCD (basically reset it)
 	void home();							//return the cursor and the display to initial position without reseting everything (command: display and cursor home)
 	
-	bool read();
+	bool read();	//I kinda abandoned this function
 	void writeChar(char buffer);			//Helper Function, you need to specify what you are sending it (Data or Command)
 	
-	void upperWrite();						//Helper to Helper
-	void lowerWrite();						//Helper to Helper
-	void fullWrite();						//Helper to Helper
+	void upperWrite();						//Helper to Helper fullWrite()
+	void lowerWrite();						//Helper to Helper fullWrite()
+	void fullWrite();						//Helper to Helper writeChar()
 	
-	void printString(char* str);			//Main(accepts string array only) and Helper
-	void print(const char* format, ...);	//Main(works like printf for the display)
-	void print(char* str);
-	void print(char ch);
+	void printString(char*__restrict str, int8_t n);			//Main(accepts string array only) and Helper
+	void print(const char* format, ...);	//Main(works like printf() for the display)
+	void print(char*__restrict str);					//Main(the same as printString)
+	void print(char ch);					//Main(the same as writeChar for data)
 	
-	void send();
+	void send();							//Helper sending your operation(data or command) to the MCU peripherals connected to the LCD(this is called when data or command is constructed and ready to be sent to the LCD) 
 	
 	void init(uint8_t Lines=2,bool Cursor=CURSOR_UNDERLINE_ON,bool Blink=BLINK_OFF,bool Resolution=RESOLUTION_5x7);
-	//void init(uint8_t Lines);
+	//initialize the LCD by setting number of lines cursor settings and display resolution
 	
-	void setCursor(bool Line,uint8_t address);
-	void shiftR(uint8_t num, short delay=100);						//shift the visible part of the display(not the cursor) to the right
-	void shiftL(uint8_t num, short delay=100);						//shift the visible part of the display(not the cursor) to the left
-	void shift(uint8_t direction, uint8_t num, short delay=100);
+	void setCursor(bool Line,uint8_t address);						//Main-> sets the postion of the cursor on the display(0,0 is start for line 0 and 1,0 is the start for line 1)
+	void shiftR(uint8_t num, short delay=100);						//Main-> shift the visible part of the display(not the cursor) to the right
+	void shiftL(uint8_t num, short delay=100);						//Main-> shift the visible part of the display(not the cursor) to the left
+	void shift(uint8_t direction, uint8_t num, short delay=100);	//Helper and Main-> shift the visible part of the display(not the cursor) to the direction chosen a number of times "num" with a delay between each time = delay in ms
 	
-	void displayShift(char fixedStartAddress=0x10, bool line=0, bool direction=LtoR);
-	void writeDirection(char startAddress=0x00, bool Line=0, bool direction=LtoR);
+	void displayShift(char fixedStartAddress=0x10, bool line=0, bool direction=LtoR);	//Main-> a writing mode that allows you to write characters similer by inserting the firist on in the address passed to this API then shifts the character(to right or left) then insert the new character in the same address. best way to understand it is to call it then print() something with delay between each print
+	void writeDirection(char startAddress=0x00, bool Line=0, bool direction=LtoR);		//Main-> chose write direction either left to right like English or right to left like Arabic
 	
-	uint8_t defineGraph(char graph[8], uint8_t address=0);			
+	uint8_t defineGraph(char * __restrict graph, int8_t address=-1);								//MAIN-> you pass graph which is an array of the character pattern (could be array of 7 or 8 accourding to your LCD), if you passed an address (should be 0-7) then it will use it and return it, if not then it will automatically assign the character to the next available address and return it. the return value is passed to printf() to show the character on the LCD
 	//use this site to generate your custom character :https://www.quinapalus.com/hd44780udg.html
 private:
 	struct storage{
@@ -83,7 +84,43 @@ private:
 	}pins;
 };
 
+//---------------------------------------------------------------------------------------------------------
+//											inline functions
+//---------------------------------------------------------------------------------------------------------
+
+inline void MyLCD::print(char*__restrict str){
+	printString(str, strlen(str));
+}
+
+inline void MyLCD::print(char ch){
+	data();
+	writeChar(ch);
+}
+
+inline void MyLCD::fullWrite(){
+	upperWrite();
+	lowerWrite();
+}
 
 
+inline void MyLCD::clear(){
+	command();
+	writeChar(0x1);
+	_delay_us(1.64);
+}
+
+inline void MyLCD::home(){
+	command();
+	writeChar(0x2);
+	_delay_ms(1.64);
+}
+
+inline void MyLCD::shiftL(uint8_t num, short delay){
+	shift(LEFT,num,delay);
+}
+
+inline void MyLCD::shiftR(uint8_t num, short delay){
+	shift(RIGHT,num,delay);
+}
 
 #endif /* LCD_H_ */

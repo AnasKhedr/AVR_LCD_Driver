@@ -4,7 +4,7 @@
  * Created: 29-Mar-19 11:52:55 PM
  * Author : Anas Khedr
  */
-#define F_CPU 8000000UL
+//#define F_CPU 8000000UL
 
 #include "LCD.h"
 #include <avr/io.h>
@@ -20,6 +20,14 @@ MyLCD::MyLCD(char Port_of_D,uint8_t D7,uint8_t D6,uint8_t D5,uint8_t D4,uint8_t 
 	_delay_ms(11);
 	switch (Port_of_D)
 	{
+		/*	if you have different ports then you need to find their address. they are usualy in a header called iom*.h where * is the name of the MCU (for atmega328p the header is called iom328p.h)
+		// all the iom*.h are located here C:\Program Files (x86)\Atmel\Studio\7.0\packs\atmel\ATmega_DFP\1.1.130\include\avr
+		case 'A':
+			DDRA |= _BV(RS) | _BV(E);
+			//PORTA _SFR_IO8(address)
+			Port_of_registers=0x05;
+			break;
+		*/
 		case 'B':
 			DDRB |= _BV(D7) | _BV(D6) | _BV(D5) | _BV(D4) | _BV(RS) | _BV(E);
 			//PORTB _SFR_IO8(0x05)
@@ -67,6 +75,13 @@ MyLCD::MyLCD(char Port_of_D,uint8_t D7,uint8_t D6,uint8_t D5,uint8_t D4,uint8_t 
 	//if(Port_of_D == Port_of_registers) return -1; //error in Atmel328p but may work in other MCU
 	switch (Port_of_D)
 	{
+		/*
+		case 'A':
+			DDRA |= _BV(RS) | _BV(E);
+			//PORTA _SFR_IO8(address)
+			Port_of_registers=0x05;
+			break;
+		*/
 		case 'B':
 		DDRB |= _BV(D7) | _BV(D6) | _BV(D5) | _BV(D4) | _BV(D3) | _BV(D2) | _BV(D1) | _BV(D0);
 		//PORTB _SFR_IO8(0x05)
@@ -90,6 +105,13 @@ MyLCD::MyLCD(char Port_of_D,uint8_t D7,uint8_t D6,uint8_t D5,uint8_t D4,uint8_t 
 	
 	switch (Port_of_registers)
 		{
+			/*
+			case 'A':
+				DDRA |= _BV(RS) | _BV(E);
+				//PORTA _SFR_IO8(address)
+				Port_of_registers=0x05;
+				break;
+			*/
 			case 'B':
 				DDRB |= _BV(RS) | _BV(E);
 				//PORTB _SFR_IO8(0x05)
@@ -140,23 +162,18 @@ MyLCD::MyLCD(char Port_of_D,uint8_t D7,uint8_t D6,uint8_t D5,uint8_t D4,uint8_t 
 void MyLCD::send(){											//send command/data to LCD
 	if(pins.wire_num){										//1 => 8-wires & 0 => 4-wires
 		_SFR_IO8(pins.Port_of_registers) |= _BV(pins.E);	//E High
-		_delay_us(1000);
+		//_delay_us(1000);
 		_SFR_IO8(pins.Port_of_registers) &=~ _BV(pins.E);	//then E low
-		_delay_us(1000);
+		//_delay_us(1000);
+		_SFR_IO8(pins.Port_of_D) = 0x00;				//reset all pins D0-D7 for next use of |=
 	}else{													//0 => 4-wires & 1 => 4-wires
 		_SFR_IO8(pins.Port_of_D) |= _BV(pins.E);			//E High
-		_delay_us(1000);
+		//_delay_us(1000);
 		_SFR_IO8(pins.Port_of_D) &=~ _BV(pins.E);			//then E low
-		_delay_us(1000);
-	}
-	
-	
-	if(pins.wire_num){									//1 => 8-wires & 0 => 4-wires
-		_SFR_IO8(pins.Port_of_D) = 0x00;				//reset all pins D0-D7 for next use of |=
-	}
-	else{
+		//_delay_us(1000);
 		_SFR_IO8(pins.Port_of_D) &=~ ((1<<pins.D7) | (1<<pins.D6) | (1<<pins.D5) | (1<<pins.D4)); //reset used pins D4-D7 for next use of |=
 	}
+	
 }
 
 void MyLCD::command(){
@@ -176,7 +193,7 @@ void MyLCD::data(){
 		_SFR_IO8(pins.Port_of_D) |= _BV(pins.RS);
 	}
 }
-
+/*		inlined, definition is in header file
 void MyLCD::clear(){
 	command();
 	writeChar(0x1);
@@ -188,7 +205,7 @@ void MyLCD::home(){
 	writeChar(0x2);
 	_delay_ms(1.64);
 }
-
+*/
 bool MyLCD::read(){
 	if (pins.wire_num){		//pins.wire_num == 1 => 8-wires
 		if (pins.RW_Status){	//1 => using(issuing) read/write(RW) command/pin
@@ -229,18 +246,19 @@ void MyLCD::writeChar(char buffer){	//write data on D7-D4 or D7-D0 (according to
 		_delay_us(1000);
 		_SFR_IO8(pins.Port_of_registers) &=~ _BV(pins.E);		//the E low
 		*/
-	}else{														//pins.wire_num == 0 => 4-wires
+	}
+	else{														//pins.wire_num == 0 => 4-wires
 		if(pins.RW_Status){										//1 => using(issuing) read/write(RW) command/pin
 			_SFR_IO8(pins.Port_of_registers) &=~ _BV(pins.RW);	//reset RW pin to 0 to write
 		}
 		else{													//0 => NOT using(issuing) read/write(RW) command/pin
 				//no need to reset RW since you're not using RW
-			}
-			upperWrite();
-			send();
-			lowerWrite();
-			send();
 		}
+		upperWrite();
+		send();
+		lowerWrite();
+		send();
+	}
 		
 	//_SFR_IO8(pins.Port_of_D) = 0x00;		//reset the PORT cuz |= will keep the pin 1		"send() clears it insted"
 }
@@ -274,16 +292,16 @@ void MyLCD::lowerWrite(){
 	}
 	
 }
-
+/*		inlined, definition is in header file
 void MyLCD::fullWrite(){
 	upperWrite();
 	lowerWrite();
 }
+*/
+void MyLCD::printString(char*__restrict str, int8_t n){
 
-void MyLCD::printString(char* str){
-	uint8_t i;
 	data();
-	for(i=0;i<strlen(str);i++){
+	for(size_t i=0;i<n;i++){
 		writeChar(str[i]);
 	}
 }
@@ -292,13 +310,13 @@ void MyLCD::print(const char* format, ...){
 	va_list arguments;
 	va_start(arguments,format);
 	
-	vsprintf(buffer,format,arguments);
+	int8_t n = vsprintf(buffer,format,arguments);
 	va_end(arguments);
 	
-	printString(buffer);
+	printString(buffer,n);
 }
-
-void MyLCD::print(char* str){
+/*		inlined, definition is in header file
+void MyLCD::print(char *__restrict str){
 	printString(str);
 }
 
@@ -306,7 +324,9 @@ void MyLCD::print(char ch){
 	data();
 	writeChar(ch);
 }
-/*
+*/
+
+/*------xxxx-------	i decided that overloading init() is not necessary and i't better if i used default parameters insted (i forgot i was using C++ when i created this)
 void MyLCD::init(uint8_t Lines){
 	Lines--;
 	char fun_set = 0b00110000;  //this is the default command "function set"
@@ -320,11 +340,11 @@ void MyLCD::init(uint8_t Lines,bool Cursor,bool Blink,bool Resolution){	//C is C
 	Lines--;
 	char fun_set = 0b00100000;  //this is the default command "function set"
 	char display = 0b00001100;  //this is the default command "Display on\off & cursor" with display set on
-	fun_set |= Lines<<pins.D3 | pins.wire_num<<pins.D4 | Resolution<<pins.D2;
+	fun_set |= Lines<<3 | pins.wire_num<<4 | Resolution<<2;
 	display |= Cursor<<1 | Blink<<0;
 	command();
 	if(!pins.wire_num){			//pins.wire_num == 0 => 4-wires
-		_SFR_IO8(pins.Port_of_D) |= _BV(pins.D5);	//this is the function set command for choosing 4-bit mode
+		_SFR_IO8(pins.Port_of_D) |= _BV(5);	//this is the function set command for choosing 4-bit mode
 		send();
 	}
 	writeChar(fun_set);
@@ -341,7 +361,7 @@ void MyLCD::init(uint8_t Lines,bool Cursor,bool Blink,bool Resolution){	//C is C
 void MyLCD::setCursor(bool Line,uint8_t address){
 	address += Line*(0x40);			//0x40 is the start address of Line 2
 	command();
-	writeChar(address|0x80);		//0x80 which is 0b10000000 to tell the LCD that this is display address
+	writeChar(address|0x80);		//0x80 which is 0b10000000 to tell the LCD that this is display address command
 	
 }
 
@@ -363,7 +383,7 @@ void MyLCD::shift(uint8_t direction, uint8_t num, short delay){
 		}
 	}
 }
-
+/*		inlined, definition is in header file
 void MyLCD::shiftL(uint8_t num, short delay){
 	shift(LEFT,num,delay);
 }
@@ -371,7 +391,7 @@ void MyLCD::shiftL(uint8_t num, short delay){
 void MyLCD::shiftR(uint8_t num, short delay){
 	shift(RIGHT,num,delay);
 }
-
+*/
 void MyLCD::displayShift(char fixedStartAddress, bool line, bool direction){
 	setCursor(line,fixedStartAddress);
 	command();
@@ -399,9 +419,9 @@ void MyLCD::writeDirection(char startAddress/* =0x00 */, bool Line/* =0 */, bool
 }
 
 
-uint8_t MyLCD::defineGraph(char graph[8], uint8_t address/* =0 */){
+uint8_t MyLCD::defineGraph(char * graph, int8_t address/* =-1 */){	//again this is C++ not C so plain old  restrict doesn't work, i need to use  __restrict__ . See: http://gcc.gnu.org/onlinedocs/gcc/Restricted-Pointers.html
 	static uint8_t idx=0x40;		//this is the first address we can save a new char in
-	if(address){
+	if(address != -1){
 		idx = 0x40 | address*8;
 	}
 	
@@ -415,8 +435,9 @@ uint8_t MyLCD::defineGraph(char graph[8], uint8_t address/* =0 */){
 	data();
 	for(uint8_t i=0; i<8;i++){
 		writeChar(graph[i]);
+		//_delay_ms(100);
 	}
 	
 	idx+=8;
-	return (idx-0x40)/8 -1;				//return the address which you can use to print the char you defined
+	return (idx-0x40)/8 -1;				//return the handler which you can use to print the char you defined
 }

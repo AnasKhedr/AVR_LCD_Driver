@@ -13,71 +13,39 @@
 #include <stdio.h>
 
 int main(void){
-    /* Replace with your application code */
-	//MyLCD lcd('D',7,6,5,4,3,2,1,0,'B',0,1);
-	MyLCD lcd('D',7,6,5,4,3,2);
-	//_delay_ms(10);
-	lcd.init(2,1,0);
-	//_delay_ms(10);
-	//lcd.data();
-	//int age=5;
-	//lcd.print("AGE: %d",age);
-	//lcd.writeChar('A');
-	//DDRC = 0x01;
-	//char temp='0';
-	//bool line=0;
-	int x=0;
-	//lcd.writeDirecion(0,0,0);
-	//lcd.print("anas ahmed fouad hassan khedr");
-	lcd.command();
-	//lcd.writeDirection(ENDADDRESS,0,RtoL);
-	//lcd.print("anas: %d",x);
-	//lcd.shiftR(0x18,100);
+	//check the header file to see all available constructors and how to use 8-bit mode if you want
+	MyLCD lcd('D',7,6,5,4,3,2);					//set the pins that connect the lcd to the MCU: (connected to port D, D7 of the LCD is connected to pin 7 or PORT D, D6 of the LCD is connected to pin 6 or PORT D, D5 of the LCD is connected to pin 5 or PORT D, D4 of the LCD is connected to RS or PORT D, D7 of the LCD is connected to pin 3 or PORT D, E of the LCD is connected to pin 2 or PORT D)
+	lcd.init(2,1,0);							//set up the LCD, the LCD has 2 lines, show the cursor underline , don't blink (those are the same as the default arguments so if you just called init(); it would have had the same parameter, hence same effect)
+
+	char customChar0[] = {0,14,21,23,17,14,0,0};//clock
+	char customChar1[] = {10,10,31,31,14,4,4,0};//fesha
+	char customChar2[] = {4,4,31,0,14,4,4,0};	//capacitor
+	char customChar3[] = {0,10,10,0,17,14,0,0};	//smiley face
 	
-	struct tempx 
-	{
-		float x;
-		char y;
-	};
+	//define new graphs or characters (use this site to create the string array needed: https://www.quinapalus.com/hd44780udg.html
+	uint8_t clock_handler=lcd.defineGraph(customChar0);	//clock
+	uint8_t fesha_handler=lcd.defineGraph(customChar1);	//fesha
+	uint8_t cap_handler  =lcd.defineGraph(customChar2);	//capacitor
+	uint8_t Sface_handler=lcd.defineGraph(customChar3);	//smiley face
 	
-	lcd.command();
-	lcd.clear();
-	lcd.setCursor(0,0);
-	/*
-	//_delay_ms(20);
-	lcd.command();
-	lcd.writeChar(0x40 | 0);
+	lcd.clear();		//clear the display since defineGraph() misses with display
+	lcd.home();			//rest display position and remove any shifts
+	lcd.setCursor(0,0);	//this is useless since home() restes diplay posithion
 	
-	lcd.data();
-	lcd.writeChar(0b01100);
-	lcd.writeChar(0b01100);
-	lcd.writeChar(0b01100);
-	lcd.writeChar(0b01100);
-	lcd.writeChar(0b01100);
-	lcd.writeChar(0b01100);
-	lcd.writeChar(0b01100);
-	lcd.writeChar(0b01100);
-	
-	lcd.command();
-	lcd.setCursor(0,0);
-	lcd.data();
-	lcd.writeChar((uint8_t)0);
-	*/
-	char customChar[7] = {14,27,24,30,27,27,14	};
-	
-	uint8_t d_ch=lcd.defineGraph(customChar);
-	char customChar2[] = {10,10,31,31,14,4,4};
-	uint8_t d_ch2=lcd.defineGraph(customChar2);
-	lcd.command();
-	lcd.setCursor(1,0);
-	lcd.data();
-	lcd.print("%d",(int)d_ch);
-	lcd.writeChar(d_ch);
-	lcd.writeChar(d_ch2);
-	
+	lcd.data();								//must tell the LCD that you'll be sending data() if you want to use writeChar() [writeChar() could be used to send command() as well]
+	lcd.writeChar(Sface_handler);			//send a char to the lcd (whether this char is a command() or data() is set by thes two APIs)
+	lcd.print(" Hello ");					//print a char* (this is an overloaded function that can handle char, char* and vlist)
+	lcd.print(Sface_handler);				//print a char  (this is an overloaded function that can handle char, char* and vlist)
+	lcd.setCursor(1,0);						//go to the first pixel of line 1 (second line)
+	lcd.print("defined chars: %c %c %c %c",clock_handler,Sface_handler,fesha_handler,cap_handler);//print a vlist very much the same as printf (this is an overloaded function that can handle char, char* and vlist)
+	_delay_ms(300);
+
     while (1) 
     {
-		
+		lcd.shiftR(6,100);					//shift the visible part of the LCD 6 times to the Right with a 100ms delay between each single shift
+		_delay_ms(200);
+		lcd.shiftL(6,100);					//shift the visible part of the LCD 6 times to the Right with a 100ms delay between each single shift
+		_delay_ms(200);
 		
 		/*
 		lcd.print("size of struct:%d",sizeof(tempx));
