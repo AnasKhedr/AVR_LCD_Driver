@@ -328,8 +328,11 @@ void MyLCD::init(uint8_t Lines,bool Cursor,bool Blink,bool Resolution){	//C is C
 		send();
 	}
 	writeChar(fun_set);
+	_delay_ms(4.1);
 	writeChar(display);
+	_delay_ms(4.1);
 	clear();
+	_delay_ms(4.1);
 	//writeDirecion(0,0,0);		//this is set by default
 	//send();
 }
@@ -399,7 +402,7 @@ void MyLCD::writeDirection(char startAddress/* =0x00 */, bool Line/* =0 */, bool
 uint8_t MyLCD::defineGraph(char graph[8], uint8_t address/* =0 */){
 	static uint8_t idx=0x40;		//this is the first address we can save a new char in
 	if(address){
-		idx = 0x40 + address*8;
+		idx = 0x40 | address*8;
 	}
 	
 	if(idx >= 0x80){				//you have defined 8 new characters which is the max number on new characters that can be defined

@@ -49,7 +49,7 @@ public:
 	void clear();							//clear the LCD (basically reset it)
 	void home();							//return the cursor and the display to initial position without reseting everything (command: display and cursor home)
 	
-	//bool read();
+	bool read();
 	void writeChar(char buffer);			//Helper Function, you need to specify what you are sending it (Data or Command)
 	
 	void upperWrite();						//Helper to Helper

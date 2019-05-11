@@ -69,7 +69,7 @@ int main(void){
 	char customChar2[] = {10,10,31,31,14,4,4};
 	uint8_t d_ch2=lcd.defineGraph(customChar2);
 	lcd.command();
-	lcd.setCursor(0,0);
+	lcd.setCursor(1,0);
 	lcd.data();
 	lcd.print("%d",(int)d_ch);
 	lcd.writeChar(d_ch);
